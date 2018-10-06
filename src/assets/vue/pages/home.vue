@@ -49,93 +49,103 @@
 </template>
 
 <script>
-  import notification from '../../static/js/notification.js'
-  import bus from '../../static/js/bus.js'
+import notification from "../../static/js/notification.js";
+import bus from "../../static/js/bus.js";
 
-  export default {
-    name: 'home',
-    data () {
-      return {
-        items: [],
-        test: null
+export default {
+  name: "home",
+  data() {
+    return {
+      items: [],
+      test: null
+    };
+  },
+  // App mounted and ready so set listener and get items stored
+  mounted() {
+    bus.$on("saved", e => this.getStoredItems());
+    this.$nextTick(() => {
+      this.getStoredItems();
+    });
+  },
+
+  methods: {
+    // Get all the reminders user has stored
+    getStoredItems() {
+      // Browser Only
+      if (!window.cordova) {
+        this.items = JSON.parse(localStorage.getItem("remind_medi")) || [];
+        return;
+      }
+      // Get native result or delay until ready
+      if (typeof NativeStorage === "undefined") {
+        this.delayNativeCall();
+      } else {
+        NativeStorage.getItem("remind_medi", this.success, this.error);
       }
     },
-    // App mounted and ready so set listener and get items stored
-    mounted () {
-      bus.$on('saved', e => this.getStoredItems())
-      setTimeout(() => {
-        this.getStoredItems()
-      }, 150)
+    // Put result in items array
+    success(result) {
+      this.items = result;
     },
+    // Error
+    error(e) {
+      if (e.code == 2) {
+        // Assign items array to empty
+        this.items = [];
+      }
+    },
+    // Called when reminder deleted
+    onSwipeoutDeleted(e, it) {
+      // Delect notification(s)
+      notification.delete(it.ids);
 
-    methods: {
-      // Get all the reminders user has stored
-      getStoredItems () {
-        // Browser Only
-        if(!window.cordova) {
-          this.items = JSON.parse(localStorage.getItem('remind_medi')) || []
-          return
-        }
-        // Get native result or delay until ready
-        if(typeof NativeStorage === 'undefined') {  
-          this.delayNativeCall()       
-        } else {
-          NativeStorage.getItem('remind_medi', this.success, this.error)
-        }
-      },
-      // Put result in items array
-      success (result) {
-        this.items = result
-      },
-      // Error
-      error (e) {
-        if(e.code == 2) {
-          // Assign items array to empty
-          this.items = []
-          }
-      },
-      // Called when reminder deleted
-      onSwipeoutDeleted (e,it) {
+      // Delect from items array
+      let pos = this.items.indexOf(it);
+      this.items.splice(pos, 1);
 
-        // Delect notification(s)
-        notification.delete(it.ids)
-
-        // Delect from items array
-        let pos = this.items.indexOf(it)
-        this.items.splice(pos,1)
-                 
-        // Update Storage
-        // Browser only
-        if(!window.NativeStorage) {
-          localStorage.setItem('remind_medi', JSON.stringify(this.items))
+      // Update Storage
+      // Browser only
+      if (!window.NativeStorage) {
+        localStorage.setItem("remind_medi", JSON.stringify(this.items));
         // Update native
-        } else {
-          NativeStorage.setItem('remind_medi', this.items, (result) => console.log(result), (err) => console.log(err))
-        }
-
-      },
-      // Used in testing
-      clearAll () {
-        NativeStorage.clear(function(result){console.log(result)}, function(e){console.log(e)})
-        if(window.cordova) {
-          cordova.plugins.notification.local.clearAll(function () {
-            console.log('done')
-          })
-        }
-      },
-      // Delay call to getStoredItems
-      delayNativeCall () {
-        setTimeout(() => {
-          this.getStoredItems()
-        }, 200)
+      } else {
+        NativeStorage.setItem(
+          "remind_medi",
+          this.items,
+          result => console.log(result),
+          err => console.log(err)
+        );
       }
+    },
+    // Used in testing
+    clearAll() {
+      NativeStorage.clear(
+        function(result) {
+          console.log(result);
+        },
+        function(e) {
+          console.log(e);
+        }
+      );
+      if (window.cordova) {
+        cordova.plugins.notification.local.clearAll(function() {
+          console.log("done");
+        });
+      }
+    },
+    // Delay call to getStoredItems
+    delayNativeCall() {
+      setTimeout(() => {
+        this.getStoredItems();
+      }, 200);
     }
   }
+};
 </script>
 
 <style>
-
-.home_message, .list_heading {
+.home_message,
+.list_heading {
   display: flex;
   justify-content: center;
   align-items: center;
@@ -152,22 +162,24 @@
   font-size: 1.3em;
 }
 
-.list_heading .icon, .home_message .icon {
+.list_heading .icon,
+.home_message .icon {
   color: #213442;
-  margin-right: .7rem;
+  margin-right: 0.7rem;
 }
 
 .home_message .icon {
-  margin-right: .5rem;
+  margin-right: 0.5rem;
 }
 
-.list_heading i.icon::before, .home_message i.icon::before {
+.list_heading i.icon::before,
+.home_message i.icon::before {
   font-size: x-large;
 }
 
 .center_div {
-    text-align: center;
-  }
+  text-align: center;
+}
 
 .welcome {
   margin-bottom: 70px;
@@ -178,15 +190,15 @@
 }
 
 .icon {
-  color: #247BA0;
+  color: #247ba0;
 }
 
-.sliding a, .sliding i {
+.sliding a,
+.sliding i {
   color: white;
 }
 
 a.swipeout-delete {
   background: #f44336 !important;
 }
-
 </style>
