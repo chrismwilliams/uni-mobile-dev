@@ -28,7 +28,7 @@ Final version of an iOS Mobile Application for reminding user's to take their me
 
 With the iOS platform installed and to view in the browser (localhost:8080) once webpack has compiled.
 
-> `cordova run ios -- --lr`
+`cordova run ios -- --lr`
 
 **These last three can be inspected via Safari -> development toolbar**
 
@@ -36,15 +36,15 @@ With the iOS platform installed and to view in the browser (localhost:8080) once
 
 ### Run on the device which must be plugged-in and unlocked at the same time.
 
-> `cordova run ios --device`
+`cordova run ios --device`
 
 ### Run in an emulator on an apple mac. Simulate both hardware & software, here the target is set to an iPhone 6s
 
-> `cordova emulate ios --target="iPhone-6s"`
+`cordova emulate ios --target="iPhone-6s"`
 
 ### Run a simulation on an apple mac, again an iPhone 6s.
 
-> `cordova run ios --target=“iPhone-6s”`
+`cordova run ios --target=“iPhone-6s”`
 
 ## Project files (found in src folder)
 
